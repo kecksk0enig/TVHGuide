@@ -18,8 +18,13 @@
  */
 package org.tvheadend.tvhguide;
 
+import java.util.Date;
+import java.util.Iterator;
+
+import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.Programme;
+
 import android.content.SharedPreferences;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ClipDrawable;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
@@ -27,11 +32,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import java.util.Date;
-import java.util.Iterator;
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.model.Channel;
-import org.tvheadend.tvhguide.model.Programme;
 
 /**
  *
@@ -39,14 +39,15 @@ import org.tvheadend.tvhguide.model.Programme;
  */
 public class ChannelListViewWrapper {
 
-    private TextView name;
-    private TextView nowTitle;
-    private TextView nowTime;
-    private TextView nextTitle;
-    private TextView nextTime;
-    private ImageView icon;
-    private ImageView nowProgressImage;
-    private ClipDrawable nowProgress;
+    private final TextView name;
+    private final TextView nowTitle;
+    private final TextView nowTime;
+    private final TextView nextTitle;
+    private final TextView nextTime;
+    private final ImageView icon;
+	private final ImageView iconRec;
+    private final ImageView nowProgressImage;
+    private final ClipDrawable nowProgress;
 
     public ChannelListViewWrapper(View base) {
         name = (TextView) base.findViewById(R.id.ch_name);
@@ -60,6 +61,7 @@ public class ChannelListViewWrapper {
         nextTitle = (TextView) base.findViewById(R.id.ch_next_title);
         nextTime = (TextView) base.findViewById(R.id.ch_next_time);
         icon = (ImageView) base.findViewById(R.id.ch_icon);
+		iconRec = (ImageView) base.findViewById(R.id.ch_icon_rec);
     }
 
     public void repaint(Channel channel) {
@@ -74,15 +76,25 @@ public class ChannelListViewWrapper {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(icon.getContext());
         Boolean showIcons = prefs.getBoolean("showIconPref", false);
-        icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
-        icon.setBackgroundDrawable(new BitmapDrawable(channel.iconBitmap));
+        if(showIcons){
+        	icon.setVisibility(ImageView.VISIBLE);
+        	iconRec.setVisibility(ImageView.VISIBLE);
+       		icon.setImageBitmap(channel.iconBitmap);
+        }
+        else{
+        	icon.setVisibility(ImageView.GONE);
+        	iconRec.setVisibility(ImageView.GONE);
+        	icon.setImageDrawable(null);
+        }
 
-        if (channel.isRecording()) {
-            icon.setImageResource(R.drawable.ic_rec_small);
-        } else {
-            icon.setImageDrawable(null);
+        if (channel.isRecording() && showIcons) {
+			iconRec.setImageResource(R.drawable.ic_rec_small);
+		}
+		else {
+			iconRec.setImageDrawable(null);
         }
         icon.invalidate();
+		iconRec.invalidate();
 
         Iterator<Programme> it = channel.epg.iterator();
         if (!channel.isTransmitting && it.hasNext()) {
