@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources><!-- // not yet in use
     <string-array name="pref_res_list">
         <item>576</item>
         <item>480</item>
@@ -43,7 +43,7 @@
         <item>Pass-through</item>
         <item>None</item>
     </string-array>
-    
+    -->
     <string-array name="pref_container_list">
         <item>matroska</item>
         <item>mpegts</item>
@@ -56,5 +56,5 @@
         <item>MPEG-TS</item>
         <item>MPEG-PS</item>
         <item>Pass-through</item>
-    </string-array>
+    </string-array> 
 </resources>
