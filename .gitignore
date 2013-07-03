@@ -11,3 +11,8 @@ libs
 /bin/
 /nbandroid/
 local.properties
+.classpath
+.project
+.settings
+.metadata
+

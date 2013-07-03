@@ -18,15 +18,6 @@
  */
 package org.tvheadend.tvhguide.htsp;
 
-import android.app.Service;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Binder;
-import android.os.IBinder;
-import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,6 +34,7 @@ import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import org.tvheadend.tvhguide.R;
 import org.tvheadend.tvhguide.TVHGuideApplication;
 import org.tvheadend.tvhguide.model.Channel;
@@ -54,6 +46,18 @@ import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.model.SeriesInfo;
 import org.tvheadend.tvhguide.model.Stream;
 import org.tvheadend.tvhguide.model.Subscription;
+
+import android.app.Service;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Binder;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  *
@@ -117,7 +121,8 @@ public class HTSService extends Service implements HTSConnectionListener {
                 //Since this is blocking, spawn to a new thread
                 execService.execute(new Runnable() {
 
-                    public void run() {
+                    @Override
+					public void run() {
                         connection.open(hostname, port);
                         connection.authenticate(username, password);
                     }
@@ -198,7 +203,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         showError(getString(recourceId));
     }
 
-    public void onError(int errorCode) {
+    @Override
+	public void onError(int errorCode) {
         switch (errorCode) {
             case HTSConnection.CONNECTION_LOST_ERROR:
                 showError(R.string.err_con_lost);
@@ -215,7 +221,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         }
     }
 
-    public void onError(Exception ex) {
+    @Override
+	public void onError(Exception ex) {
         showError(ex.getLocalizedMessage());
     }
 
@@ -337,7 +344,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         if (eventId > 0 && ch.epg.size() < 2) {
             execService.schedule(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     getEvents(ch, eventId, 5);
                 }
             }, 30, TimeUnit.SECONDS);
@@ -503,7 +511,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         app.updateSubscription(sub);
     }
 
-    public void onMessage(HTSMessage msg) {
+    @Override
+	public void onMessage(HTSMessage msg) {
         String method = msg.getMethod();
         if (method.equals("tagAdd")) {
             onTagAdd(msg);
@@ -559,7 +568,7 @@ public class HTSService extends Service implements HTSConnectionListener {
         return "";
     }
 
-    public void cacheImage(String url, File f) throws MalformedURLException, IOException {
+	public void cacheImage(String url, File f) throws MalformedURLException, IOException {
         Log.d(TAG, "Caching " + url + " as " + f.toString());
 
         InputStream is;
@@ -644,7 +653,8 @@ public class HTSService extends Service implements HTSConnectionListener {
     private void getChannelTagIcon(final ChannelTag tag) {
         execService.execute(new Runnable() {
 
-            public void run() {
+            @Override
+			public void run() {
 
                 try {
                     tag.iconBitmap = getIcon(tag.icon);
@@ -668,7 +678,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("numFollowing", cnt);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
 
                 if (!response.containsKey("events")) {
                     return;
@@ -708,7 +719,8 @@ public class HTSService extends Service implements HTSConnectionListener {
 
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 TVHGuideApplication app = (TVHGuideApplication) getApplication();
                 Channel ch = app.getChannel(response.getLong("channelId"));
                 Programme p = new Programme();
@@ -760,7 +772,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         }
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
 
                 if (!response.containsKey("eventIds")) {
                     return;
@@ -779,7 +792,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("id", id);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
 
                 boolean success = response.getInt("success", 0) == 1;
             }
@@ -792,7 +806,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("id", id);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
 
                 boolean success = response.getInt("success", 0) == 1;
             }
@@ -805,7 +820,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("eventId", eventId);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 if (response.getInt("success", 0) == 1) {
                     for (Programme p : ch.epg) {
                         if (p.id == eventId) {
@@ -839,7 +855,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("subscriptionId", subscriptionId);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 //NOP
             }
         });
@@ -854,7 +871,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("subscriptionId", subscriptionId);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 //NOP
             }
         });
@@ -867,7 +885,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("speed", speed);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 //NOP
             }
         });
@@ -879,7 +898,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("channelId", ch.id);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 String path = response.getString("path", null);
                 String ticket = response.getString("ticket", null);
                 String webroot = connection.getWebRoot();
@@ -898,7 +918,8 @@ public class HTSService extends Service implements HTSConnectionListener {
         request.putField("dvrId", rec.id);
         connection.sendMessage(request, new HTSResponseHandler() {
 
-            public void handleResponse(HTSMessage response) {
+            @Override
+			public void handleResponse(HTSMessage response) {
                 String path = response.getString("path", null);
                 String ticket = response.getString("ticket", null);
 

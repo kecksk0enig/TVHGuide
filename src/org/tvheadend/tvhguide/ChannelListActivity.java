@@ -18,6 +18,15 @@
  */
 package org.tvheadend.tvhguide;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.tvheadend.tvhguide.htsp.HTSListener;
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.ChannelTag;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -26,15 +35,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.*;
-import android.widget.*;
-import java.util.*;
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.htsp.HTSListener;
-import org.tvheadend.tvhguide.htsp.HTSService;
-import org.tvheadend.tvhguide.model.Channel;
-import org.tvheadend.tvhguide.model.ChannelTag;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 /**
  *
@@ -79,7 +94,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
         builder.setAdapter(tagAdapter, new android.content.DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface arg0, int pos) {
+            @Override
+			public void onClick(DialogInterface arg0, int pos) {
                 setCurrentTag(tagAdapter.getItem(pos));
                 populateList();
             }
@@ -89,7 +105,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         tagBtn = findViewById(R.id.ct_btn);
         tagBtn.setOnClickListener(new android.view.View.OnClickListener() {
 
-            public void onClick(View arg0) {
+            @Override
+			public void onClick(View arg0) {
                 tagDialog.show();
             }
         });
@@ -243,7 +260,7 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        Channel ch = (Channel) chAdapter.getItem(position);
+        Channel ch = chAdapter.getItem(position);
 
         if (ch.epg.isEmpty()) {
             return;
@@ -275,12 +292,14 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         }
     }
 
-    public void onMessage(String action, final Object obj) {
+    @Override
+	public void onMessage(String action, final Object obj) {
         if (action.equals(TVHGuideApplication.ACTION_LOADING)) {
 
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     boolean loading = (Boolean) obj;
                     setLoading(loading);
                 }
@@ -288,7 +307,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     chAdapter.add((Channel) obj);
                     chAdapter.notifyDataSetChanged();
                     chAdapter.sort();
@@ -297,7 +317,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_DELETE)) {
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     chAdapter.remove((Channel) obj);
                     chAdapter.notifyDataSetChanged();
                 }
@@ -305,7 +326,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_UPDATE)) {
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     Channel channel = (Channel) obj;
                     chAdapter.updateView(getListView(), channel);
                 }
@@ -313,7 +335,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         } else if (action.equals(TVHGuideApplication.ACTION_TAG_ADD)) {
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     ChannelTag tag = (ChannelTag) obj;
                     tagAdapter.add(tag);
                 }
@@ -321,7 +344,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         } else if (action.equals(TVHGuideApplication.ACTION_TAG_DELETE)) {
             runOnUiThread(new Runnable() {
 
-                public void run() {
+                @Override
+				public void run() {
                     ChannelTag tag = (ChannelTag) obj;
                     tagAdapter.remove(tag);
                 }
@@ -340,7 +364,8 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         public void sort() {
             sort(new Comparator<Channel>() {
 
-                public int compare(Channel x, Channel y) {
+                @Override
+				public int compare(Channel x, Channel y) {
                     return x.compareTo(y);
                 }
             });
